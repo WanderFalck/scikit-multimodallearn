@@ -46,7 +46,6 @@
 #
 """Testing for the mumbo module."""
 
-
 import pickle
 import numpy as np
 import unittest
@@ -64,6 +63,7 @@ from multimodal.boosting.combo import MuComboClassifier
 from multimodal.tests.data.get_dataset_path import get_dataset_path
 from multimodal.datasets.data_sample import MultiModalArray
 
+
 class NoSampleWeightLasso(Lasso):
 
     def fit(self, X, y, check_input=True):
@@ -79,14 +79,13 @@ class TestMuComboClassifier(unittest.TestCase):
         iris.views_ind = np.array([0, 2, 4])
         clf.iris = iris
 
-
     def test_init(self):
         clf = MuComboClassifier()
         self.assertEqual(clf.random_state, None)
         self.assertEqual(clf.n_estimators, 50)
         n_estimators = 3
         clf = MuComboClassifier(n_estimators=n_estimators)
-        #self.assertEqual(clf.view_mode_)
+        # self.assertEqual(clf.view_mode_)
 
     def test_init_var(self):
         n_classes = 3
@@ -95,7 +94,7 @@ class TestMuComboClassifier(unittest.TestCase):
         expected_cost = np.array(
             [[[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]],
              [[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]],
-             [[-2, 1, 0.5], [1, 1, -1], [1, -2,0.5], [1, 1, -1]]],
+             [[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]]],
             dtype=np.float64)
         # expected_cost_glob = np.array(
         #     [[-2, 1, 1], [1, 1, -2], [1, -2, 1], [1, 1, -2]], dtype=np.float64)
@@ -106,7 +105,7 @@ class TestMuComboClassifier(unittest.TestCase):
         expected_beta_class = np.ones((n_views, n_classes)) / n_classes
         clf = MuComboClassifier()
         clf.n_classes_ = n_classes
-        (cost,  label_score, label_score_glob, predicted_classes, score_function, beta_class, n_yi_s) \
+        (cost, label_score, label_score_glob, predicted_classes, score_function, beta_class, n_yi_s) \
             = clf._init_var(n_views, y)
         np.testing.assert_equal(cost, expected_cost)
         # np.testing.assert_equal(cost_glob, expected_cost_glob)
@@ -148,13 +147,12 @@ class TestMuComboClassifier(unittest.TestCase):
         expected_cost = np.array(
             [[[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]],
              [[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]],
-             [[-2, 1, 0.5], [1, 1, -1], [1, -2,0.5], [1, 1, -1]]],
+             [[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]]],
             dtype=np.float64)
         dist = clf._compute_dist(cost, y)
-        expected_dist = np.array([[ 0.25,0.25,0.25,0.25],
-                                  [ 0.5,0.5, -2.,2. ], [-0.5 , 0.5 ,-1.,  2. ]])
+        expected_dist = np.array([[0.25, 0.25, 0.25, 0.25],
+                                  [0.5, 0.5, -2., 2.], [-0.5, 0.5, -1., 2.]])
         np.testing.assert_equal(dist, expected_dist)
-
 
     # def test_compute_coop_coef(self):
     #     y = np.array([0, 1, 2, 0])
@@ -166,7 +164,6 @@ class TestMuComboClassifier(unittest.TestCase):
     #     coop_coef = clf._compute_coop_coef(predicted_classes, y)
     #
     #     assert_array_equal(coop_coef, expected_coop_coef)
-
 
     def test_compute_edges(self):
         cost = np.array(
@@ -183,24 +180,22 @@ class TestMuComboClassifier(unittest.TestCase):
 
         np.testing.assert_equal(edges, expected_edges)
 
-
     def test_compute_alphas(self):
         decimal = 12
         expected_alpha = 0.5
-        edge = (np.e-1.) / (np.e+1.)
+        edge = (np.e - 1.) / (np.e + 1.)
 
         clf = MuComboClassifier()
         alpha = clf._compute_alphas(edge)
         self.assertAlmostEqual(alpha, expected_alpha, decimal)
 
         expected_alphas = np.array([0.5, 1., 2.])
-        tmp = np.array([np.e, np.e**2, np.e**4])
-        edges = (tmp-1.) / (tmp+1.)
+        tmp = np.array([np.e, np.e ** 2, np.e ** 4])
+        edges = (tmp - 1.) / (tmp + 1.)
 
         alphas = clf._compute_alphas(edges)
 
         np.testing.assert_almost_equal(alphas, expected_alphas, decimal)
-
 
     def test_prepare_beta_solver(self):
         clf = MuComboClassifier()
@@ -208,97 +203,99 @@ class TestMuComboClassifier(unittest.TestCase):
         clf.n_classes_ = 3
         A, b, G, h, l = clf._prepare_beta_solver()
         a_n = np.array(A)
-        A_expected = np.array([[ 1 , 1 , 1 , 0 , 0,  0,  0 , 0, 0],
-                               [ 0 , 0 , 0 , 1,  1,  1,  0 , 0, 0],
-                               [ 0 , 0 , 0 , 0 , 0,  0,  1,  1,1 ]])
-        np.testing.assert_equal(a_n , A_expected)
-        b_expected = np.array([[ 1.00e+00],[ 1.00e+00],[ 1.00e+00]])
+        A_expected = np.array([[1, 1, 1, 0, 0, 0, 0, 0, 0],
+                               [0, 0, 0, 1, 1, 1, 0, 0, 0],
+                               [0, 0, 0, 0, 0, 0, 1, 1, 1]])
+        np.testing.assert_equal(a_n, A_expected)
+        b_expected = np.array([[1.00e+00], [1.00e+00], [1.00e+00]])
         #                      [ 1.00e+00],[ 1.00e+00],[ 1.00e+00],
         #                      [ 1.00e+00],[ 1.00e+00],[ 1.00e+00]])
         b_n = np.array(b)
         np.testing.assert_equal(b_n, b_expected)
         G_n = np.array(G)
-        G_expected = np.array([[1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00],
-                               [-1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00,  0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, -1.00e+00,  0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, -1.00e+00,  0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00, -1.00e+00,  0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00,  0.00e+00, -1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00,  0.00e+00,  0.00e+00,-1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00,  0.00e+00,  0.00e+00, 0.00e+00, -1.00e+00, 0.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00,  0.00e+00,  0.00e+00, 0.00e+00, 0.00e+00, -1.00e+00, 0.00e+00],
-                               [0.00e+00, 0.00e+00, 0.00e+00,  0.00e+00,  0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00,-1.00e+00]])
+        G_expected = np.array(
+            [[1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 1.00e+00],
+             [-1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, -1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, -1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, -1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, -1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, -1.00e+00, 0.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, -1.00e+00, 0.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, -1.00e+00, 0.00e+00],
+             [0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, -1.00e+00]])
         np.testing.assert_equal(G_n, G_expected)
         h_n = np.array(h)
-        h_expected = np.array([[ 1.00e+00],[ 1.00e+00],[ 1.00e+00],[ 1.00e+00],[ 1.00e+00],[ 1.00e+00],[ 1.00e+00],[ 1.00e+00],[ 1.00e+00],
-                               [ 0.00e+00],[ 0.00e+00],[ 0.00e+00],[ 0.00e+00],[ 0.00e+00],[ 0.00e+00],[ 0.00e+00],[ 0.00e+00],[ 0.00e+00]])
+        h_expected = np.array(
+            [[1.00e+00], [1.00e+00], [1.00e+00], [1.00e+00], [1.00e+00], [1.00e+00], [1.00e+00], [1.00e+00], [1.00e+00],
+             [0.00e+00], [0.00e+00], [0.00e+00], [0.00e+00], [0.00e+00], [0.00e+00], [0.00e+00], [0.00e+00],
+             [0.00e+00]])
         np.testing.assert_equal(h_n, h_expected)
 
         self.assertEqual(l, {'l': 18})
 
     def test_solver_cp_forbeta(self):
-            clf = MuComboClassifier()
-            clf.n_views_ = 3
-            clf.n_classes_ = 3
-            clf.n_yi_ = np.array([1, 1, 2])
-            A, b, G, h, l = clf._prepare_beta_solver()
-            y_i = np.array([0, 1, 2, 0])
-            predicted_classes = np.array([[0, 0, 1, 1], [0, 1, 0, 2], [2, 2, 0, 0]])
+        clf = MuComboClassifier()
+        clf.n_views_ = 3
+        clf.n_classes_ = 3
+        clf.n_yi_ = np.array([1, 1, 2])
+        A, b, G, h, l = clf._prepare_beta_solver()
+        y_i = np.array([0, 1, 2, 0])
+        predicted_classes = np.array([[0, 0, 1, 1], [0, 1, 0, 2], [2, 2, 0, 0]])
 
-            indicat , indicat_yi, delta = clf._indicatrice(predicted_classes, y_i)
-            indicate_vue = np.block(np.split(indicat, 3, axis=0)).squeeze()
-            indicate_vue_yi = np.block(np.split(indicat_yi, 3, axis=0)).squeeze()
-            alphas = np.array([0.5, 1., 2.])
-            cost_Tminus1 = 10 * np.array(
-                [[[2, 1, 0.5], [1, 1, 1], [1, 2, 0.5], [1, 1, 1]],
-                 [[2, 1, 0.5], [1, 1, 1], [1, 2, 0.5], [1, 1, 1]],
-                 [[2, 1, 0.5], [1, 1, 1], [1, 2, 0.5], [1, 1, 1]]],
-                dtype=np.float64)
-            cost_Tminus1_vue = np.block(np.split(cost_Tminus1, 3, axis=0)).squeeze()
-            delta_vue = np.block(np.split(delta, 3, axis=0)).squeeze()
-            solver = np.array(clf._solver_cp_forbeta(alphas, indicate_vue, indicate_vue_yi, delta_vue,
-                                         cost_Tminus1_vue, A, b, G, h, l))
-            self.assertEqual(solver.shape, (9,1))
-            s_r = np.sum(solver.reshape(3,3), axis=1)
-            np.testing.assert_almost_equal(s_r, np.ones(3, dtype=np.float), 9)
+        indicat, indicat_yi, delta = clf._indicatrice(predicted_classes, y_i)
+        indicate_vue = np.block(np.split(indicat, 3, axis=0)).squeeze()
+        indicate_vue_yi = np.block(np.split(indicat_yi, 3, axis=0)).squeeze()
+        alphas = np.array([0.5, 1., 2.])
+        cost_Tminus1 = 10 * np.array(
+            [[[2, 1, 0.5], [1, 1, 1], [1, 2, 0.5], [1, 1, 1]],
+             [[2, 1, 0.5], [1, 1, 1], [1, 2, 0.5], [1, 1, 1]],
+             [[2, 1, 0.5], [1, 1, 1], [1, 2, 0.5], [1, 1, 1]]],
+            dtype=np.float64)
+        cost_Tminus1_vue = np.block(np.split(cost_Tminus1, 3, axis=0)).squeeze()
+        delta_vue = np.block(np.split(delta, 3, axis=0)).squeeze()
+        solver = np.array(clf._solver_cp_forbeta(alphas, indicate_vue, indicate_vue_yi, delta_vue,
+                                                 cost_Tminus1_vue, A, b, G, h, l))
+        self.assertEqual(solver.shape, (9, 1))
+        s_r = np.sum(solver.reshape(3, 3), axis=1)
+        np.testing.assert_almost_equal(s_r, np.ones(3, dtype=np.float64), 9)
 
     def test_solver_compute_betas(self):
         clf = MuComboClassifier()
         clf.n_views_ = 3
         clf.n_classes_ = 3
         clf.n_yi_ = np.array([1, 1, 2])
-        cost_Tminus1 =np.array([[[-7.45744585e+01,  3.67879439e-01,  7.42065790e+01],
-          [ 4.78511743e-06,  3.87742081e-02, -3.87789932e-02],
-          [ 2.47875218e-03, -2.48182428e-03,  3.07210618e-06],
-          [ 1.35335283e-01,  6.73794700e-03, -1.42073230e-01]],
+        cost_Tminus1 = np.array([[[-7.45744585e+01, 3.67879439e-01, 7.42065790e+01],
+                                  [4.78511743e-06, 3.87742081e-02, -3.87789932e-02],
+                                  [2.47875218e-03, -2.48182428e-03, 3.07210618e-06],
+                                  [1.35335283e-01, 6.73794700e-03, -1.42073230e-01]],
 
-         [[-2.02255359e-01,  1.83156389e-02,  1.83939720e-01],
-          [ 7.38905610e+00,  4.97870684e-02, -7.43884317e+00],
-          [ 3.67879441e-01, -4.06240749e+00,  3.69452805e+00],
-          [ 3.67879441e-01,  8.10308393e+03, -8.10345181e+03]],
+                                 [[-2.02255359e-01, 1.83156389e-02, 1.83939720e-01],
+                                  [7.38905610e+00, 4.97870684e-02, -7.43884317e+00],
+                                  [3.67879441e-01, -4.06240749e+00, 3.69452805e+00],
+                                  [3.67879441e-01, 8.10308393e+03, -8.10345181e+03]],
 
-         [[-2.48182452e-03,  2.47875218e-03,  3.07234660e-06],
-          [ 5.45938775e+01,  4.03397223e+02, -4.57991101e+02],
-          [ 1.48401545e+02, -1.48426438e+02,  2.48935342e-02],
-          [ 1.09663316e+03,  2.71828184e+00, -1.09935144e+03]]])
-        score_function_Tminus1 =10 *np.ones((3,4,3), dtype =np.float)
+                                 [[-2.48182452e-03, 2.47875218e-03, 3.07234660e-06],
+                                  [5.45938775e+01, 4.03397223e+02, -4.57991101e+02],
+                                  [1.48401545e+02, -1.48426438e+02, 2.48935342e-02],
+                                  [1.09663316e+03, 2.71828184e+00, -1.09935144e+03]]])
+        score_function_Tminus1 = 10 * np.ones((3, 4, 3), dtype=np.float64)
         alphas = np.array([0.5, 1., 2.])
         predicted_classes = np.array([[0, 0, 1, 1], [0, 1, 0, 2], [2, 2, 0, 0]])
         y = np.array([0, 1, 2, 0])
         betas = clf._compute_betas(alphas, y, score_function_Tminus1, predicted_classes)
-        self.assertEqual(betas.shape, (3,3))
-        np.testing.assert_almost_equal(np.sum(betas, axis =1), np.ones(3, dtype=np.float), 9)
-        self.assertTrue(np.all(betas <= 1) )
-        self.assertTrue(np.all(betas >= 0) )
-
+        self.assertEqual(betas.shape, (3, 3))
+        np.testing.assert_almost_equal(np.sum(betas, axis=1), np.ones(3, dtype=np.float64), 9)
+        self.assertTrue(np.all(betas <= 1))
+        self.assertTrue(np.all(betas >= 0))
 
     def test_indicatrice(self):
         clf = MuComboClassifier()
@@ -306,15 +303,15 @@ class TestMuComboClassifier(unittest.TestCase):
         clf.n_classes_ = 3
         y_i = np.array([0, 1, 2, 0])
         predicted_classes = np.array([[0, 0, 1, 1], [0, 1, 0, 2], [2, 2, 0, 0]])
-        indic , indic_yi, delta = clf._indicatrice(predicted_classes, y_i)
-        expected_indi = np.array( [[[0 ,0, 0], [1 ,0 ,0],[0 ,1, 0],[0 ,1 ,0]],
-                                   [[0 , 0 , 0], [0,  0 ,0],  [1 ,0 ,0], [0, 0 ,1]],
-                                   [[0, 0 ,1], [0 ,0 ,1],[1, 0, 0], [0, 0, 0]]])
-        expected_indi_yi = np.array([[[1, 0 ,0], [0, 1, 0],  [0 ,0, 1], [1 ,0 ,0]],
-                                  [[1, 0 ,0], [0 ,1 ,0], [0, 0, 1], [1, 0, 0]],
-                                  [[1, 0, 0], [0 ,1, 0],  [0 ,0 ,1],  [1 ,0 ,0]]])
-        np.testing.assert_equal(indic , expected_indi)
-        np.testing.assert_equal(indic_yi , expected_indi_yi)
+        indic, indic_yi, delta = clf._indicatrice(predicted_classes, y_i)
+        expected_indi = np.array([[[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 1, 0]],
+                                  [[0, 0, 0], [0, 0, 0], [1, 0, 0], [0, 0, 1]],
+                                  [[0, 0, 1], [0, 0, 1], [1, 0, 0], [0, 0, 0]]])
+        expected_indi_yi = np.array([[[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 0, 0]],
+                                     [[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 0, 0]],
+                                     [[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 0, 0]]])
+        np.testing.assert_equal(indic, expected_indi)
+        np.testing.assert_equal(indic_yi, expected_indi_yi)
 
     def test_compute_cost(self):
         decimal = 12
@@ -332,49 +329,48 @@ class TestMuComboClassifier(unittest.TestCase):
         #       [[8, 2, -2.], [2, 4, 0.], [6., 1, -2], [8, 4., 1]]],
         #      dtype=np.float64)
         cost_Tminus1 = np.array(
-                [[[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]],
-                 [[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]],
-                 [[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]]],
-                dtype=np.float64)
-        score_function_Tminus1 =10 *np.ones((3,4,3), dtype=np.float)
+            [[[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]],
+             [[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]],
+             [[-2, 1, 0.5], [1, 1, -1], [1, -2, 0.5], [1, 1, -1]]],
+            dtype=np.float64)
+        score_function_Tminus1 = 10 * np.ones((3, 4, 3), dtype=np.float64)
         clf = MuComboClassifier()
         clf.n_views_ = 3
         clf.n_classes_ = 3
         clf.n_yi_ = np.array([1, 1, 2])
         betas = clf._compute_betas(alphas, y, score_function_Tminus1, predicted_classes)
         cost, label_score, score_function_dif = clf._compute_cost(label_score, predicted_classes, y, alphas,
-                                              betas, use_coop_coef=True)
-        cost_expected = np.array([[[-6.58117293e+01,  3.24652469e-01,  6.54870769e+01],
-                                   [ 5.42224839e-06,  4.39369338e-02, -4.39423560e-02],
-                                   [ 2.47875216e-03, -2.48182426e-03,  3.07210615e-06],
-                                   [ 1.35335283e-01,  6.73794705e-03, -1.42073230e-01]],
+                                                                  betas, use_coop_coef=True)
+        cost_expected = np.array([[[-6.58117293e+01, 3.24652469e-01, 6.54870769e+01],
+                                   [5.42224839e-06, 4.39369338e-02, -4.39423560e-02],
+                                   [2.47875216e-03, -2.48182426e-03, 3.07210615e-06],
+                                   [1.35335283e-01, 6.73794705e-03, -1.42073230e-01]],
 
-                                  [[-2.02255355e-01,  1.83156385e-02,  1.83939717e-01],
-                                   [ 7.38905610e+00,  4.97870688e-02, -7.43884317e+00],
-                                   [ 3.67879448e-01, -4.06240750e+00,  3.69452805e+00],
-                                   [ 3.67879448e-01,  8.10308393e+03, -8.10345181e+03]],
+                                  [[-2.02255355e-01, 1.83156385e-02, 1.83939717e-01],
+                                   [7.38905610e+00, 4.97870688e-02, -7.43884317e+00],
+                                   [3.67879448e-01, -4.06240750e+00, 3.69452805e+00],
+                                   [3.67879448e-01, 8.10308393e+03, -8.10345181e+03]],
 
-                                  [[-2.48725300e-03,  2.47875218e-03,  8.50082247e-06],
-                                   [ 1.97311865e+01,  1.45794844e+02, -1.65526031e+02],
-                                   [ 3.28220396e+01, -3.28469331e+01,  2.48935342e-02],
-                                   [ 1.09663316e+03,  4.44198002e+00, -1.10107514e+03]]])
+                                  [[-2.48725300e-03, 2.47875218e-03, 8.50082247e-06],
+                                   [1.97311865e+01, 1.45794844e+02, -1.65526031e+02],
+                                   [3.28220396e+01, -3.28469331e+01, 2.48935342e-02],
+                                   [1.09663316e+03, 4.44198002e+00, -1.10107514e+03]]])
         np.testing.assert_almost_equal(cost, cost_expected, 4)
-        expected_label_score = np.array([[[-0.875,      -2.,          4.,        ],
-                                       [-8.,          1.,          4.125     ],
-                                       [ 2.,          8.00000001, -4.        ],
-                                       [ 2.,         -0.99999999,  4.        ]],
+        expected_label_score = np.array([[[-0.875, -2., 4., ],
+                                          [-8., 1., 4.125],
+                                          [2., 8.00000001, -4.],
+                                          [2., -0.99999999, 4.]],
 
-                                      [[ 2.00000002, -2.,          1.        ],
-                                       [ 4.,         -0.99999999,  2.        ],
-                                       [ 1.00000002,  2.,          4.        ],
-                                       [-1.99999998,  8.,         -1.        ]],
+                                         [[2.00000002, -2., 1.],
+                                          [4., -0.99999999, 2.],
+                                          [1.00000002, 2., 4.],
+                                          [-1.99999998, 8., -1.]],
 
-                                      [[ 8.,          2.,         -2.98220046],
-                                       [ 2.,         4.,         -0.98220046],
-                                       [ 4.49110023,  1.,         -2.        ],
-                                       [ 8.,          2.49110023,  1.        ]]])
-        np.testing.assert_almost_equal(label_score, expected_label_score,6)
-
+                                         [[8., 2., -2.98220046],
+                                          [2., 4., -0.98220046],
+                                          [4.49110023, 1., -2.],
+                                          [8., 2.49110023, 1.]]])
+        np.testing.assert_almost_equal(label_score, expected_label_score, 6)
 
     #
     #     label_score = np.array(
@@ -488,12 +484,12 @@ class TestMuComboClassifier(unittest.TestCase):
     #
 
     def test_fit_views_ind(self):
-       X = np.array([[1., 1., 1.], [-1., -1., -1.]])
-       y = np.array([0, 1])
-       expected_views_ind = np.array([0, 1, 3])
-       clf = MuComboClassifier()
-       clf.fit(X, y)
-       # np.testing.assert_equal(clf.X_.views_ind, expected_views_ind)
+        X = np.array([[1., 1., 1.], [-1., -1., -1.]])
+        y = np.array([0, 1])
+        expected_views_ind = np.array([0, 1, 3])
+        clf = MuComboClassifier()
+        clf.fit(X, y)
+        # np.testing.assert_equal(clf.X_.views_ind, expected_views_ind)
 
     #     assert_array_equal(clf.views_ind_, expected_views_ind)
     # #
@@ -515,7 +511,6 @@ class TestMuComboClassifier(unittest.TestCase):
         X = np.zeros((5, 4, 2))
         y = np.array([0, 1])
         self.assertRaises(ValueError, clf.fit, X, y, views_ind)
-
 
     #     assert_raises(ValueError, clf.fit, X, y, views_ind)
     #
@@ -606,7 +601,6 @@ class TestMuComboClassifier(unittest.TestCase):
         y_expected = clf.predict(X)
         np.testing.assert_almost_equal(y, y_expected, 9)
 
-
     # def test_limit_cases():
     #     np.random.seed(seed)
     #
@@ -641,9 +635,8 @@ class TestMuComboClassifier(unittest.TestCase):
     #     assert_array_equal(clf.predict(X), y)
     #     assert_array_equal(clf.predict(np.array([[-1., 0., 1.]])), np.array([1]))
 
-
     def test_simple_predict(self):
-        #np.random.seed(seed)
+        # np.random.seed(seed)
 
         # Simple example with 2 classes and 1 view
         X = np.array(
@@ -657,22 +650,21 @@ class TestMuComboClassifier(unittest.TestCase):
         views_ind = np.array([0, 2])
         clf = MuComboClassifier()
         clf.fit(X, y, views_ind)
-        #assert_array_equal(clf.predict(X), y)
-        #assert_array_equal(clf.predict(np.array([[1., 1.], [-1., -1.]])),
+        # assert_array_equal(clf.predict(X), y)
+        # assert_array_equal(clf.predict(np.array([[1., 1.], [-1., -1.]])),
         #                   np.array([0, 1]))
-        #assert_equal(clf.decision_function(X).shape, y.shape)
+        # assert_equal(clf.decision_function(X).shape, y.shape)
 
         views_ind = np.array([[1, 0]])
         clf = MuComboClassifier()
         clf.fit(X, y, views_ind)
         np.testing.assert_almost_equal(clf.predict(X), y)
 
-
-
-        #assert_array_equal(clf.predict(X), y)
-        #assert_array_equal(clf.predict(np.array([[1., 1.], [-1., -1.]])),
+        # assert_array_equal(clf.predict(X), y)
+        # assert_array_equal(clf.predict(np.array([[1., 1.], [-1., -1.]])),
         #                 np.array([0, 1]))
-        #assert_equal(clf.decision_function(X).shape, y.shape)
+        # assert_equal(clf.decision_function(X).shape, y.shape)
+
     #
     #     # Simple example with 2 classes and 2 views
     #     X = np.array(
@@ -845,6 +837,7 @@ class TestMuComboClassifier(unittest.TestCase):
 
     def test_classifier(self):
         return check_estimator(MuComboClassifier())
+
     #
     #
     # def test_iris():
@@ -875,22 +868,21 @@ class TestMuComboClassifier(unittest.TestCase):
     #         assert_equal(len(set(est.random_state for est in clf.estimators_)),
     #                      len(clf.estimators_))
 
-
     def test_staged_methods(self):
         seed = 7
         n_estimators = 10
-    #
+        #
         target_two_classes = np.zeros(self.iris.target.shape, dtype=np.int64)
-        target_two_classes[target_two_classes.shape[0]//2:] = 1
-    #
+        target_two_classes[target_two_classes.shape[0] // 2:] = 1
+        #
         data = (
-               (self.iris.data, self.iris.target, self.iris.views_ind),
-                (self.iris.data, self.iris.target, np.array([[0, 2], [1, 3]])),
-                (self.iris.data, target_two_classes, self.iris.views_ind),
-                (self.iris.data, target_two_classes, np.array([[0, 2], [1, 3]])),
-               )
+            (self.iris.data, self.iris.target, self.iris.views_ind),
+            (self.iris.data, self.iris.target, np.array([[0, 2], [1, 3]])),
+            (self.iris.data, target_two_classes, self.iris.views_ind),
+            (self.iris.data, target_two_classes, np.array([[0, 2], [1, 3]])),
+        )
 
-    #
+        #
         for X, y, views_ind in data:
             clf = MuComboClassifier(n_estimators=n_estimators, random_state=seed)
             clf.fit(X, y, views_ind)
@@ -903,6 +895,7 @@ class TestMuComboClassifier(unittest.TestCase):
             # assert_equal(len(staged_dec_func), n_estimators)
             # assert_equal(len(staged_predict), n_estimators)
             # assert_equal(len(staged_score), n_estimators)
+
     #
     #         for ind in range(n_estimators):
     #             clf = MuComboClassifier(n_estimators=ind+1, random_state=seed)
@@ -916,15 +909,15 @@ class TestMuComboClassifier(unittest.TestCase):
     #
     #
     def test_gridsearch(self):
-    #     np.random.seed(seed)
-    #
-    #     # Check that base trees can be grid-searched.
+        #     np.random.seed(seed)
+        #
+        #     # Check that base trees can be grid-searched.
         mumbo = MuComboClassifier(base_estimator=DecisionTreeClassifier())
         parameters = {'n_estimators': (1, 2),
                       'base_estimator__max_depth': (1, 2)}
         clf = GridSearchCV(mumbo, parameters)
         clf.fit(self.iris.data, self.iris.target, views_ind=self.iris.views_ind)
-        self.assertEqual(clf.best_params_,{'base_estimator__max_depth': 2, 'n_estimators': 2})
+        self.assertEqual(clf.best_params_, {'base_estimator__max_depth': 2, 'n_estimators': 2})
 
         multimodal_data = MultiModalArray(self.iris.data, views_ind=self.iris.views_ind)
         clf = GridSearchCV(mumbo, parameters)
@@ -949,8 +942,8 @@ class TestMuComboClassifier(unittest.TestCase):
     #
     #
     def test_base_estimator_score(self):
-    #     np.random.seed(seed)
-    #
+        #     np.random.seed(seed)
+        #
         """ Test different base estimators."""
         n_estimators = 5
         clf = MuComboClassifier(RandomForestClassifier(), n_estimators=n_estimators)
@@ -963,8 +956,8 @@ class TestMuComboClassifier(unittest.TestCase):
         score = clf.score(self.iris.data, self.iris.target)
         self.assertGreater(score, 0.95, "Failed with score = {}".format(score))
 
-    #     # Check that using a base estimator that doesn't support sample_weight
-    #     # raises an error.
+        #     # Check that using a base estimator that doesn't support sample_weight
+        #     # raises an error.
         clf = MuComboClassifier(NoSampleWeightLasso())
 
         self.assertRaises(ValueError, clf.fit, self.iris.data, self.iris.target, self.iris.views_ind)
@@ -1037,6 +1030,7 @@ class TestMuComboClassifier(unittest.TestCase):
     #             else:
     #                 assert_true(all([type_ == csr_matrix for type_ in types]))
     #
+
 
 if __name__ == '__main__':
     unittest.main()
