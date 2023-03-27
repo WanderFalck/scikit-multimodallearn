@@ -39,7 +39,7 @@
 #
 #
 # ######### COPYRIGHT #########
-#"""Testing for the mumbo module."""#
+# """Testing for the mumbo module."""#
 # Author: Florent JAILLET - Laboratoire d'Informatique et Systèmes - UMR 7020
 
 import pickle
@@ -58,6 +58,7 @@ from sklearn import datasets
 from multimodal.boosting.mumbo import MumboClassifier
 
 from multimodal.tests.test_combo import NoSampleWeightLasso
+
 
 class TestMumboClassifier(unittest.TestCase):
 
@@ -104,7 +105,6 @@ class TestMumboClassifier(unittest.TestCase):
         np.testing.assert_equal(label_score_glob, expected_label_score_glob)
         self.assertEqual(predicted_classes.shape, expected_predicted_classes_shape)
 
-
     def test_compute_edge_global(self):
         cost_global = np.array([[-2, 1, 1], [1, 1, -2], [1, -2, 1], [1, 1, -2]],
                                dtype=np.float64)
@@ -115,7 +115,6 @@ class TestMumboClassifier(unittest.TestCase):
         clf = MumboClassifier()
         edge_global = clf._compute_edge_global(cost_global, predicted_classes, y)
         np.testing.assert_equal(edge_global, expected_edge_global)
-
 
     def test_compute_dist(self):
         cost = np.array(
@@ -170,7 +169,7 @@ class TestMumboClassifier(unittest.TestCase):
     def test_compute_alphas(self):
         decimal = 12
         expected_alpha = 0.5
-        edge = (np.e-1.) / (np.e+1.)
+        edge = (np.e - 1.) / (np.e + 1.)
 
         clf = MumboClassifier()
         alpha = clf._compute_alphas(edge)
@@ -178,8 +177,8 @@ class TestMumboClassifier(unittest.TestCase):
         np.testing.assert_almost_equal(alpha, expected_alpha, decimal)
 
         expected_alphas = np.array([0.5, 1., 2.])
-        tmp = np.array([np.e, np.e**2, np.e**4])
-        edges = (tmp-1.) / (tmp+1.)
+        tmp = np.array([np.e, np.e ** 2, np.e ** 4])
+        edges = (tmp - 1.) / (tmp + 1.)
 
         alphas = clf._compute_alphas(edges)
         np.testing.assert_almost_equal(alphas, expected_alphas, decimal)
@@ -348,7 +347,7 @@ class TestMumboClassifier(unittest.TestCase):
         np.random.seed(seed)
 
         n_estimators = 10
-        #print("iris views ind", self.iris.views_ind)
+        # print("iris views ind", self.iris.views_ind)
         clf = MumboClassifier(n_estimators=n_estimators, best_view_mode='edge')
         clf.fit(self.iris.data, self.iris.target, self.iris.views_ind)
         score = clf.score(self.iris.data, self.iris.target)
@@ -527,7 +526,7 @@ class TestMumboClassifier(unittest.TestCase):
         np.testing.assert_equal(clf.predict(np.array([[-1., 0., 1.]])), np.array([1]))
 
     def test_simple_examples(self):
-        seed =7
+        seed = 7
         np.random.seed(seed)
 
         # Simple example with 2 classes and 1 view
@@ -544,7 +543,7 @@ class TestMumboClassifier(unittest.TestCase):
         clf.fit(X, y, views_ind)
         np.testing.assert_equal(clf.predict(X), y)
         np.testing.assert_equal(clf.predict(np.array([[1., 1.], [-1., -1.]])),
-                           np.array([0, 1]))
+                                np.array([0, 1]))
         X = clf._global_X_transform(X, clf.X_.views_ind)
         self.assertEqual(clf.decision_function(X).shape, y.shape)
 
@@ -553,7 +552,7 @@ class TestMumboClassifier(unittest.TestCase):
         clf.fit(X, y, views_ind)
         np.testing.assert_equal(clf.predict(X), y)
         np.testing.assert_equal(clf.predict(np.array([[1., 1.], [-1., -1.]])),
-                           np.array([0, 1]))
+                                np.array([0, 1]))
         self.assertEqual(clf.decision_function(X).shape, y.shape)
 
         # Simple example with 2 classes and 2 views
@@ -570,7 +569,7 @@ class TestMumboClassifier(unittest.TestCase):
         clf.fit(X, y, views_ind)
         np.testing.assert_equal(clf.predict(X), y)
         np.testing.assert_equal(clf.predict(np.array([[1., 1., 1.], [-1., -1., -1.]])),
-                           np.array([0, 1]))
+                                np.array([0, 1]))
         self.assertEqual(clf.decision_function(X).shape, y.shape)
 
         views_ind = np.array([[2, 0], [1]], dtype=object)
@@ -578,7 +577,7 @@ class TestMumboClassifier(unittest.TestCase):
         clf.fit(X, y, views_ind)
         np.testing.assert_equal(clf.predict(X), y)
         np.testing.assert_equal(clf.predict(np.array([[1., 1., 1.], [-1., -1., -1.]])),
-                           np.array([0, 1]))
+                                np.array([0, 1]))
         self.assertEqual(clf.decision_function(X).shape, y.shape)
 
         # Simple example with 2 classes and 3 views
@@ -639,11 +638,12 @@ class TestMumboClassifier(unittest.TestCase):
 
     def test_generated_examples(self):
         seed = 7
+
         def generate_data_in_orthotope(n_samples, limits):
             limits = np.array(limits)
             n_features = limits.shape[0]
             data = np.random.random((n_samples, n_features))
-            data = (limits[:, 1]-limits[:, 0]) * data + limits[:, 0]
+            data = (limits[:, 1] - limits[:, 0]) * data + limits[:, 0]
             return data
 
         n_samples = 100
@@ -652,9 +652,9 @@ class TestMumboClassifier(unittest.TestCase):
         view_0 = np.concatenate(
             (generate_data_in_orthotope(n_samples, [[0., 1.], [0., 1.]]),
              generate_data_in_orthotope(n_samples, [[1., 2.], [0., 1.]])))
-        view_1 = generate_data_in_orthotope(2*n_samples, [[0., 1.], [0., 1.]])
+        view_1 = generate_data_in_orthotope(2 * n_samples, [[0., 1.], [0., 1.]])
         X = np.concatenate((view_0, view_1), axis=1)
-        y = np.zeros(2*n_samples, dtype=np.int64)
+        y = np.zeros(2 * n_samples, dtype=np.int64)
         y[n_samples:] = 1
         views_ind = np.array([0, 2, 4])
         clf = MumboClassifier(n_estimators=1)
@@ -673,8 +673,8 @@ class TestMumboClassifier(unittest.TestCase):
              generate_data_in_orthotope(n_samples, [[0., 1.], [1., 2.]]),
              generate_data_in_orthotope(n_samples, [[0., 1.], [0., 1.]])))
         X = np.concatenate((view_0, view_1), axis=1)
-        y = np.zeros(4*n_samples, dtype=np.int64)
-        y[2*n_samples:] = 1
+        y = np.zeros(4 * n_samples, dtype=np.int64)
+        y[2 * n_samples:] = 1
         views_ind = np.array([0, 2, 4])
         clf = MumboClassifier(n_estimators=3)
         clf.fit(X, y, views_ind)
@@ -694,9 +694,9 @@ class TestMumboClassifier(unittest.TestCase):
              generate_data_in_orthotope(n_samples, [[0., 1.], [0., 1.]]),
              generate_data_in_orthotope(n_samples, [[1., 2.], [0., 1.]])))
         X = np.concatenate((view_0, view_1, view_2), axis=1)
-        y = np.zeros(3*n_samples, dtype=np.int64)
-        y[n_samples:2*n_samples] = 1
-        y[2*n_samples:] = 2
+        y = np.zeros(3 * n_samples, dtype=np.int64)
+        y[n_samples:2 * n_samples] = 1
+        y[2 * n_samples:] = 2
         views_ind = np.array([0, 2, 4, 6])
         clf = MumboClassifier(n_estimators=3)
         clf.fit(X, y, views_ind)
@@ -716,14 +716,13 @@ class TestMumboClassifier(unittest.TestCase):
              generate_data_in_orthotope(n_samples, [[0., 1.], [0., 1.]]),
              generate_data_in_orthotope(n_samples, [[1., 2.], [0., 1.]])))
         X = np.concatenate((view_0, view_1, view_2), axis=1)
-        y = np.zeros(3*n_samples, dtype=np.int64)
-        y[n_samples:2*n_samples] = 1
-        y[2*n_samples:] = 2
+        y = np.zeros(3 * n_samples, dtype=np.int64)
+        y[n_samples:2 * n_samples] = 1
+        y[2 * n_samples:] = 2
         views_ind = np.array([0, 2, 4, 6])
         clf = MumboClassifier(n_estimators=4)
         clf.fit(X, y, views_ind)
         self.assertEqual(clf.score(X, y), 1.)
-
 
     def test_classifier(self):
         # X_zero_features = np.empty(0).reshape(3, 0)
@@ -746,7 +745,7 @@ class TestMumboClassifier(unittest.TestCase):
             clf.fit(self.iris.data, self.iris.target, views_ind)
 
             self.assertTrue(np.all((0. <= clf.estimator_errors_)
-                               & (clf.estimator_errors_ <= 1.)))
+                                   & (clf.estimator_errors_ <= 1.)))
             self.assertTrue(np.all(np.diff(clf.estimator_errors_) < 0.))
 
             np.testing.assert_equal(classes, clf.classes_)
@@ -759,21 +758,21 @@ class TestMumboClassifier(unittest.TestCase):
 
             # Check for distinct random states
             self.assertEqual(len(set(est.random_state for est in clf.estimators_)),
-                         len(clf.estimators_))
+                             len(clf.estimators_))
 
     def test_staged_methods(self):
         n_estimators = 10
         seed = 7
 
         target_two_classes = np.zeros(self.iris.target.shape, dtype=np.int64)
-        target_two_classes[target_two_classes.shape[0]//2:] = 1
+        target_two_classes[target_two_classes.shape[0] // 2:] = 1
 
         data = (
-                (self.iris.data, self.iris.target, self.iris.views_ind),
-                (self.iris.data, self.iris.target, np.array([[0, 2], [1, 3]])),
-                (self.iris.data, target_two_classes, self.iris.views_ind),
-                (self.iris.data, target_two_classes, np.array([[0, 2], [1, 3]])),
-               )
+            (self.iris.data, self.iris.target, self.iris.views_ind),
+            (self.iris.data, self.iris.target, np.array([[0, 2], [1, 3]])),
+            (self.iris.data, target_two_classes, self.iris.views_ind),
+            (self.iris.data, target_two_classes, np.array([[0, 2], [1, 3]])),
+        )
 
         for X, y, views_ind in data:
             clf = MumboClassifier(n_estimators=n_estimators, random_state=seed)
@@ -787,7 +786,7 @@ class TestMumboClassifier(unittest.TestCase):
             self.assertEqual(len(staged_score), n_estimators)
 
             for ind in range(n_estimators):
-                clf = MumboClassifier(n_estimators=ind+1, random_state=seed)
+                clf = MumboClassifier(n_estimators=ind + 1, random_state=seed)
                 clf.fit(X, y, views_ind)
                 dec_func = clf.decision_function(X)
                 predict = clf.predict(X)
@@ -806,7 +805,6 @@ class TestMumboClassifier(unittest.TestCase):
                       'base_estimator__max_depth': (1, 2)}
         clf = GridSearchCV(mumbo, parameters)
         clf.fit(self.iris.data, self.iris.target, views_ind=self.iris.views_ind)
-
 
     def test_pickle(self):
         seed = 7
@@ -844,7 +842,6 @@ class TestMumboClassifier(unittest.TestCase):
         clf = MumboClassifier(NoSampleWeightLasso())
         self.assertRaises(ValueError, clf.fit, self.iris.data, self.iris.target, self.iris.views_ind)
 
-
     def test_sparse_classification(self):
         # Check classification with sparse input.
         seed = 7
@@ -863,7 +860,7 @@ class TestMumboClassifier(unittest.TestCase):
         X_dense = self.iris.data
         y = self.iris.target
 
-        for sparse_format in [csc_matrix, csr_matrix]: #, lil_matrix, coo_matrix,dok_matrix]:
+        for sparse_format in [csc_matrix, csr_matrix]:  # , lil_matrix, coo_matrix,dok_matrix]:
             for views_ind in (self.iris.views_ind, np.array([[0, 2], [1, 3]])):
                 X_sparse = sparse_format(X_dense)
                 clf_sparse = MumboClassifier(
@@ -879,13 +876,13 @@ class TestMumboClassifier(unittest.TestCase):
                 clf_dense.fit(X_dense, y, views_ind)
 
                 np.testing.assert_equal(clf_sparse.decision_function(X_sparse),
-                                   clf_dense.decision_function(X_dense))
+                                        clf_dense.decision_function(X_dense))
 
                 np.testing.assert_equal(clf_sparse.predict(X_sparse),
-                                   clf_dense.predict(X_dense))
+                                        clf_dense.predict(X_dense))
 
                 self.assertEqual(clf_sparse.score(X_sparse, y),
-                             clf_dense.score(X_dense, y))
+                                 clf_dense.score(X_dense, y))
 
                 for res_sparse, res_dense in \
                         zip(clf_sparse.staged_decision_function(X_sparse),
@@ -905,7 +902,7 @@ class TestMumboClassifier(unittest.TestCase):
                 # Check that sparsity of data is maintained during training
                 types = [clf.data_type_ for clf in clf_sparse.estimators_]
                 if sparse_format == csc_matrix:
-                    self.assertTrue(all([issubclass(type_, csc_matrix)  for type_ in types]))
+                    self.assertTrue(all([issubclass(type_, csc_matrix) for type_ in types]))
                 else:
                     self.assertTrue(all([issubclass(type_, csr_matrix) for type_ in types]))
 
@@ -916,7 +913,7 @@ class TestMumboClassifier(unittest.TestCase):
         clf.fit(X, y)
         X_pred = np.random.randint(1, 10, 10)
         self.assertRaises(ValueError, clf._validate_X_predict, X_pred)
-        X_pred = np.random.randint(1,10,9)
+        X_pred = np.random.randint(1, 10, 9)
         self.assertRaises(ValueError, clf._validate_X_predict, X_pred)
         X_pred = np.random.randint(1, 10, (2, 9))
         self.assertRaises(ValueError, clf._validate_X_predict, X_pred)

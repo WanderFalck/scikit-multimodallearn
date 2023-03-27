@@ -1,0 +1,15 @@
+scikit-learn==0.24.2
+numpy
+scipy
+cvxopt
+
+[dev]
+pytest
+pytest-cov
+
+[doc]
+sphinx
+numpydoc
+sphinx_gallery
+matplotlib
+sphinx_rtd_theme

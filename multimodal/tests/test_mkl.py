@@ -42,6 +42,8 @@
 import unittest
 import numpy as np
 from sklearn.metrics.pairwise import rbf_kernel
+from sklearn.utils.estimator_checks import check_estimator
+
 from multimodal.tests.datasets.get_dataset_path import get_dataset_path
 from multimodal.kernels.lpMKL import MKL
 from multimodal.datasets.data_sample import MultiModalArray
@@ -128,14 +130,14 @@ class MKLTest(unittest.TestCase):
                    precision = 1E-9, n_loops = 600)
         mkl2.fit(x_metricl, y=self.y, views_ind=None)
 
-    def testPredictMVML_witoutFit(self):
+    def testPredictMVML_withoutFit(self):
        mkl = MKL(lmbda=3, nystrom_param=0.3, kernel=['rbf'], kernel_params=[{'gamma':50}],
                    use_approx = True,
                    precision = 1E-9, n_loops = 50)
        with self.assertRaises(NotFittedError):
             mkl.predict(self.test_kernel_dict)
 
-    def testPredictMVML_witoutFit(self):
+    def testPredictMVML_withoutFit(self):
        x_metric = MultiModalArray(self.kernel_dict)
        mkl = MKL(lmbda=3, nystrom_param = 0.3, kernel=['rbf'], kernel_params=[{'gamma':50}],
                    use_approx = True,
@@ -144,3 +146,7 @@ class MKLTest(unittest.TestCase):
        pred =mkl.predict(self.test_kernel_dict)
        self.assertEqual(pred.shape, (80,))
 
+    def test_classifier(self):
+        return check_estimator(MKL(lmbda=3, nystrom_param=1.0,
+                   kernel_params=None, use_approx=True,
+                   precision=1E-4, n_loops=50))

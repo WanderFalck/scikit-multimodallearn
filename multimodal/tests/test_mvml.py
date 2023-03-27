@@ -51,6 +51,7 @@ from multimodal.kernels.mvml import MVML
 from multimodal.tests.datasets.get_dataset_path import get_dataset_path
 from sklearn.utils.estimator_checks import check_estimator
 
+
 class MVMLTest(unittest.TestCase):
 
     @classmethod
@@ -72,7 +73,6 @@ class MVMLTest(unittest.TestCase):
         clf.test_kernel_dict = test_kernel_dict
         clf.test_y = test_y
 
-
     def testInitMVML(self):
         mvml = MVML(lmbda=0.1, eta=1, nystrom_param=0.2)
         self.assertEqual(mvml.nystrom_param, 0.2)
@@ -87,13 +87,13 @@ class MVMLTest(unittest.TestCase):
         # task with dict and not precomputed
         #######################################################
         mvml = MVML(lmbda=0.1, eta=1,
-                    kernel=['rbf'], kernel_params=[{'gamma':50}],
+                    kernel=['rbf'], kernel_params=[{'gamma': 50}],
                     nystrom_param=0.2)
         views_ind = [120, 240]
         mvml.fit(self.kernel_dict, y=self.y, views_ind=None)
         self.assertEqual(mvml.A.shape, (48, 48))
-        self.assertEqual(mvml.g.shape,(48, 1))
-        w_expected = np.array([[0.5],[0.5]])
+        self.assertEqual(mvml.g.shape, (48, 1))
+        w_expected = np.array([[0.5], [0.5]])
         np.testing.assert_almost_equal(mvml.w, w_expected, 8)
 
     def testFitMVMLRegression(self):
@@ -101,15 +101,15 @@ class MVMLTest(unittest.TestCase):
         # task with dict and not precomputed
         #######################################################
         y = self.y
-        y += np.random.uniform(0,1, size=y.shape)
+        y += np.random.uniform(0, 1, size=y.shape)
         mvml = MVML(lmbda=0.1, eta=1,
-                    kernel=['rbf'], kernel_params=[{'gamma':50}],
+                    kernel=['rbf'], kernel_params=[{'gamma': 50}],
                     nystrom_param=0.2)
         views_ind = [120, 240]
         mvml.fit(self.kernel_dict, y=y, views_ind=None)
         self.assertEqual(mvml.A.shape, (48, 48))
-        self.assertEqual(mvml.g.shape,(48, 1))
-        w_expected = np.array([[0.5],[0.5]])
+        self.assertEqual(mvml.g.shape, (48, 1))
+        w_expected = np.array([[0.5], [0.5]])
         np.testing.assert_almost_equal(mvml.w, w_expected, 8)
 
     def testFitMVMLPrecision(self):
@@ -117,13 +117,13 @@ class MVMLTest(unittest.TestCase):
         # task with dict and not precomputed
         #######################################################
         mvml = MVML(lmbda=0.1, eta=1,
-                    kernel=['rbf'], kernel_params=[{'gamma':50}],
+                    kernel=['rbf'], kernel_params=[{'gamma': 50}],
                     nystrom_param=0.2, precision=1E-0)
         views_ind = [120, 240]
         mvml.fit(self.kernel_dict, y=self.y, views_ind=None)
         self.assertEqual(mvml.A.shape, (48, 48))
-        self.assertEqual(mvml.g.shape,(48, 1))
-        w_expected = np.array([[0.5],[0.5]])
+        self.assertEqual(mvml.g.shape, (48, 1))
+        w_expected = np.array([[0.5], [0.5]])
         np.testing.assert_almost_equal(mvml.w, w_expected, 8)
 
     def testFitMVMLDictNLoop(self):
@@ -131,13 +131,13 @@ class MVMLTest(unittest.TestCase):
         # task with dict and not precomputed
         #######################################################
         mvml = MVML(lmbda=0.1, eta=1,
-                    kernel=['rbf'], kernel_params=[{'gamma':50}],
+                    kernel=['rbf'], kernel_params=[{'gamma': 50}],
                     nystrom_param=0.2, n_loops=2, learn_w=1)
         views_ind = [120, 240]
         mvml.fit(self.kernel_dict, y=self.y, views_ind=None)
         self.assertEqual(mvml.A.shape, (48, 48))
-        self.assertEqual(mvml.g.shape,(48, 1))
-        w_expected = np.array([0.655, 0.65 ])
+        self.assertEqual(mvml.g.shape, (48, 1))
+        w_expected = np.array([0.655, 0.65])
         np.testing.assert_almost_equal(mvml.w, w_expected, 3)
 
     def testFitMVMLMetric(self):
@@ -150,7 +150,7 @@ class MVMLTest(unittest.TestCase):
         mvml2 = MVML(lmbda=0.1, eta=1, nystrom_param=1.0)
         mvml2.fit(x_metricl, y=self.y, views_ind=None)
         self.assertEqual(mvml2.A.shape, (240, 240))
-        self.assertEqual(mvml2.g.shape,(240, 1))
+        self.assertEqual(mvml2.g.shape, (240, 1))
         np.testing.assert_almost_equal(mvml2.w, w_expected, 8)
         with self.assertRaises(ValueError):
             mvml2.fit([1, 2, 3])
@@ -165,7 +165,7 @@ class MVMLTest(unittest.TestCase):
         mvml2 = MVML(lmbda=0.1, eta=1, nystrom_param=1.0, learn_A=4)
         mvml2.fit(x_metricl, y=self.y, views_ind=None)
         self.assertEqual(mvml2.A.shape, (240, 240))
-        self.assertEqual(mvml2.g.shape,(240, 1))
+        self.assertEqual(mvml2.g.shape, (240, 1))
         np.testing.assert_almost_equal(mvml2.w, w_expected, 8)
         with self.assertRaises(ValueError):
             mvml2.fit([1, 2, 3])
@@ -180,7 +180,7 @@ class MVMLTest(unittest.TestCase):
         mvml2 = MVML(lmbda=0.1, eta=1, nystrom_param=1.0, learn_A=3)
         mvml2.fit(x_metricl, y=self.y, views_ind=None)
         self.assertEqual(mvml2.A.shape, (240, 240))
-        self.assertEqual(mvml2.g.shape,(240, 1))
+        self.assertEqual(mvml2.g.shape, (240, 1))
         np.testing.assert_almost_equal(mvml2.w, w_expected, 8)
         with self.assertRaises(ValueError):
             mvml2.fit([1, 2, 3])
@@ -189,13 +189,13 @@ class MVMLTest(unittest.TestCase):
         #######################################################
         # task with Metric array
         #######################################################
-        w_expected = np.array([0.2,  0.1]) # [0.94836083 , 0.94175933] [ 0.7182,  0.7388]
+        w_expected = np.array([0.2, 0.1])  # [0.94836083 , 0.94175933] [ 0.7182,  0.7388]
         x_metricl = MultiModalArray(self.kernel_dict)
         mvml2 = MVML(lmbda=0.1, eta=1, nystrom_param=0.6,
                      learn_A=2, learn_w=1)
         mvml2.fit(x_metricl, y=self.y, views_ind=None)
         self.assertEqual(mvml2.A.shape, (144, 144))
-        self.assertEqual(mvml2.g.shape,(144, 1))
+        self.assertEqual(mvml2.g.shape, (144, 1))
         np.testing.assert_almost_equal(mvml2.w, w_expected, 0)
         pred = mvml2.predict(self.test_kernel_dict)
         self.assertEqual(pred.shape, (80,))
@@ -204,13 +204,13 @@ class MVMLTest(unittest.TestCase):
         #######################################################
         # task with Metric array
         #######################################################
-        w_expected = np.array([1.3,  1.4]) # [0.94836083 , 0.94175933] [ 0.7182,  0.7388]
+        w_expected = np.array([1.3, 1.4])  # [0.94836083 , 0.94175933] [ 0.7182,  0.7388]
         x_metricl = MultiModalArray(self.kernel_dict)
         mvml2 = MVML(lmbda=0.1, eta=1, nystrom_param=0.6,
                      learn_A=1, learn_w=1)
         mvml2.fit(x_metricl, y=self.y, views_ind=None)
         self.assertEqual(mvml2.A.shape, (144, 144))
-        self.assertEqual(mvml2.g.shape,(144, 1))
+        self.assertEqual(mvml2.g.shape, (144, 1))
         np.testing.assert_almost_equal(mvml2.w, w_expected, 0)
         pred = mvml2.predict(self.test_kernel_dict)
         self.assertEqual(pred.shape, (80,))
@@ -225,7 +225,7 @@ class MVMLTest(unittest.TestCase):
         mvml3 = MVML(lmbda=0.1, eta=1, nystrom_param=1.0)
         mvml3.fit(x_array, y=self.y, views_ind=[0, 120, 240])
         self.assertEqual(mvml3.A.shape, (240, 240))
-        self.assertEqual(mvml3.g.shape,(240, 1))
+        self.assertEqual(mvml3.g.shape, (240, 1))
         np.testing.assert_almost_equal(mvml3.w, w_expected, 8)
 
     def testFitMVMLArray_1d(self):
@@ -238,39 +238,37 @@ class MVMLTest(unittest.TestCase):
         for v in range(n_views):
             x_array_1d[v] = self.kernel_dict[v]
         mvml4 = MVML(lmbda=0.1, eta=1, learn_A=3, nystrom_param=0.6,
-                     kernel=['rbf'], kernel_params=[{'gamma':50}])
+                     kernel=['rbf'], kernel_params=[{'gamma': 50}])
         mvml4.fit(x_array_1d, y=self.y)
         self.assertEqual(mvml4.A.shape, (144, 144))
-        self.assertEqual(mvml4.g.shape,(144, 1))
+        self.assertEqual(mvml4.g.shape, (144, 1))
         np.testing.assert_almost_equal(mvml4.w, w_expected, 8)
 
-
     def testPredictMVML_witoutFit(self):
-       mvml = MVML(lmbda=0.1, eta=1,
-                   kernel=['rbf'], kernel_params=[{'gamma':50}],
-                   nystrom_param=0.2)
-       with self.assertRaises(NotFittedError):
-           mvml.predict(self.test_kernel_dict)
+        mvml = MVML(lmbda=0.1, eta=1,
+                    kernel=['rbf'], kernel_params=[{'gamma': 50}],
+                    nystrom_param=0.2)
+        with self.assertRaises(NotFittedError):
+            mvml.predict(self.test_kernel_dict)
 
     def testPredictMVMLKernel(self):
-       mvml = MVML(lmbda=0.1, eta=1,
-                   kernel=['rbf'], kernel_params={'gamma':50},
-                   nystrom_param=0.2, learn_A=4)
-       mvml.fit(self.kernel_dict, y=self.y)
-       pred =mvml.predict(self.test_kernel_dict)
-       self.assertEqual(pred.shape, (80,))
+        mvml = MVML(lmbda=0.1, eta=1,
+                    kernel=['rbf'], kernel_params={'gamma': 50},
+                    nystrom_param=0.2, learn_A=4)
+        mvml.fit(self.kernel_dict, y=self.y)
+        pred = mvml.predict(self.test_kernel_dict)
+        self.assertEqual(pred.shape, (80,))
 
     def testPredictMVML(self):
-       mvml = MVML(lmbda=0.1, eta=1,
-                   nystrom_param=1.0, learn_A=4)
-       mvml.fit(self.kernel_dict, y=self.y)
-       pred = mvml.predict(self.test_kernel_dict)
-       self.assertEqual(pred.shape, (80,))
-       # print(pred.shape)
+        mvml = MVML(lmbda=0.1, eta=1,
+                    nystrom_param=1.0, learn_A=4)
+        mvml.fit(self.kernel_dict, y=self.y)
+        pred = mvml.predict(self.test_kernel_dict)
+        self.assertEqual(pred.shape, (80,))
+        # print(pred.shape)
 
     def test_classifier(self):
-        pass
-        # return check_estimator(MVML)
+        return check_estimator(MVML())
 
     def test_check_kernel(self):
         clf = MVML()

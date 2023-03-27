@@ -44,8 +44,8 @@ from sklearn.base import BaseEstimator
 from sklearn.base import ClassifierMixin
 from sklearn.utils.multiclass import unique_labels
 from sklearn.utils.validation import check_X_y
-from sklearn.utils.validation  import check_array
-from sklearn.utils.validation  import check_is_fitted
+from sklearn.utils.validation import check_array
+from sklearn.utils.validation import check_is_fitted
 from multimodal.kernels.mkernel import MKernel
 from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.multiclass import check_classification_targets
@@ -115,18 +115,20 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
     weights : learned weight for combining the solutions of views, learned in
 
     """
+
     def __init__(self, lmbda, nystrom_param=1.0, kernel="linear",
                  kernel_params=None, use_approx=True, precision=1E-4, n_loops=50):
         # calculate nyström approximation (if used)
+        self.classes_ = None
         self.lmbda = lmbda
         self.n_loops = n_loops
         self.use_approx = use_approx
         self.nystrom_param = nystrom_param
-        self.kernel= kernel
+        self.kernel = kernel
         self.kernel_params = kernel_params
         self.precision = precision
 
-    def fit(self, X, y= None, views_ind=None):
+    def fit(self, X, y=None, views_ind=None):
         """
 
         Parameters
@@ -165,12 +167,14 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
         self : object
             Returns self.
         """
-        self.X_, self.K_= self._global_kernel_transform(X, views_ind=views_ind)
+        self.X_, self.K_ = self._global_kernel_transform(X, views_ind=views_ind)
         check_X_y(self.X_, y)
         check_classification_targets(y)
+
         if type_of_target(y) in "binary":
             self.classes_, y = np.unique(y, return_inverse=True)
-            y[y==0] = -1.0
+            y[y == 0] = -1.0
+
         elif type_of_target(y) in "continuous":
             y = y.astype(float)
             self.regression_ = True
@@ -184,7 +188,6 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
         self.C = C
         self.weights = weights
         return self
-
 
     def learn_lpMKL(self):
         """
@@ -203,8 +206,8 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
 
         prevalpha = False
         max_diff = 1
-        if (self.precision >= max_diff):
-            raise ValueError(" %f precision must be > to %f" % (self.precision,max_diff))
+        if self.precision >= max_diff:
+            raise ValueError(" %f precision must be > to %f" % (self.precision, max_diff))
         kernels = np.zeros((views, n, n))
         for v in range(0, views):
             kernels[v, :, :] = np.dot(self.U_dict[v], np.transpose(self.U_dict[v]))
@@ -223,7 +226,7 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
             else:
                 combined_kernel = np.zeros((n, n))
                 for v in range(0, views):
-                    combined_kernel = combined_kernel + weights[v]*X.get_view(v)
+                    combined_kernel = combined_kernel + weights[v] * X.get_view(v)
             # combined kernel includes the weights
 
             # alpha = (K-lambda*I)^-1 y
@@ -236,13 +239,13 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
             ft2 = np.zeros(views)
             for v in range(0, views):
                 if self.nystrom_param < 1 and self.use_approx:
-                        # ft2[v,vv] = weights_old[v,vv] * np.dot(np.transpose(C), np.dot(np.dot(np.dot(data.U_dict[v],
-                        #                                                             np.transpose(data.U_dict[v])),
-                        #                                                             np.dot(data.U_dict[vv],
-                        #                                                             np.transpose(data.U_dict[vv]))), C))
-                    ft2[v] = np.linalg.norm(weights_old[v] * np.dot(kernels[v], C))**2
+                    # ft2[v,vv] = weights_old[v,vv] * np.dot(np.transpose(C), np.dot(np.dot(np.dot(data.U_dict[v],
+                    #                                                             np.transpose(data.U_dict[v])),
+                    #                                                             np.dot(data.U_dict[vv],
+                    #                                                             np.transpose(data.U_dict[vv]))), C))
+                    ft2[v] = np.linalg.norm(weights_old[v] * np.dot(kernels[v], C)) ** 2
                 else:
-                    ft2[v] = np.linalg.norm(weights_old[v] * np.dot(X.get_view(v), C))**2
+                    ft2[v] = np.linalg.norm(weights_old[v] * np.dot(X.get_view(v), C)) ** 2
                     # ft2[v] = weights_old[v] * np.dot(np.transpose(C), np.dot(data.kernel_dict[v], C))
             # calculate the sum for downstairs
             # print(weights_old)
@@ -264,11 +267,11 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
             # Add to prevent faillure on max_diff_gamma_prev
             if not 'max_diff_gamma_prev' in globals(): max_diff_gamma_prev = max_diff_gamma
             # try to see if convergence is as good as it gets: if it is stuck
-            if max_diff_gamma < 10*self.precision and max_diff_gamma_prev < max_diff_gamma:
+            if max_diff_gamma < 10 * self.precision and max_diff_gamma_prev < max_diff_gamma:
                 # if the gamma difference starts to grow we are most definitely stuck!
                 # (this condition determined empirically by running algo and observing the convergence)
                 stuck = True
-            if rounds > 1 and max_diff_gamma - max_diff_gamma_prev > 100*self.precision:
+            if rounds > 1 and max_diff_gamma - max_diff_gamma_prev > 100 * self.precision:
                 # If suddenly the difference starts to grow much
                 stuck = True
 
@@ -307,11 +310,11 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
         """
         check_is_fitted(self, ['X_', 'C', 'K_', 'y_', 'weights'])
         X, K = self._global_kernel_transform(X,
-                                                         views_ind=self.X_.views_ind,
-                                                         Y=self.X_)
+                                             views_ind=self.X_.views_ind,
+                                             Y=self.X_)
         check_array(X)
         C = self.C
-        weights  = self.weights
+        weights = self.weights
         pred = self.lpMKL_predict(K, C, weights)
         return pred
 
@@ -353,7 +356,6 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
         pred = np.where(pred == -1, 0, pred)
         return np.take(self.classes_, pred)
 
-
     def lpMKL_predict(self, X, C, weights):
         """
 
@@ -374,7 +376,7 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
         """
         views = X.n_views
         tt = X.shape[0]
-        m = self.K_.shape[0] # self.nystrom_param * n
+        m = self.K_.shape[0]  # self.nystrom_param * n
 
         #  NO TEST KERNEL APPROXIMATION
         # kernel = weights[0] * self.data.test_kernel_dict[0]
@@ -386,7 +388,7 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
         for v in range(0, views):
             if self.nystrom_param < 1:
                 kernel = kernel + weights[v] * np.dot(np.dot(X.get_view(v)[:, 0:m], self.W_sqrootinv_dict[v]),
-                                                  np.transpose(self.U_dict[v]))
+                                                      np.transpose(self.U_dict[v]))
             else:
                 kernel = kernel + weights[v] * X.get_view(v)
 
@@ -415,4 +417,3 @@ class MKL(BaseEstimator, ClassifierMixin, MKernel):
             Mean accuracy of self.predict(X) wrt. y.
         """
         return super(MKL, self).score(X, y)
-

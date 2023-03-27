@@ -1,0 +1,64 @@
+
+
+.. _sphx_glr_tutorial_auto_examples_mumbo:
+
+
+MuMBo Examples
+--------------
+
+The following toy examples illustrate how the MuMBo algorithm exploits
+cooperation between views for classification.
+
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this toy example, we generate data from two classes, split between two two-dimensional views...">
+
+.. only:: html
+
+  .. image:: /tutorial/auto_examples/mumbo/images/thumb/sphx_glr_plot_mumbo_2_views_2_classes_thumb.png
+    :alt: Mumbo 2 views, 2 classes example
+
+  :ref:`sphx_glr_tutorial_auto_examples_mumbo_plot_mumbo_2_views_2_classes.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Mumbo 2 views, 2 classes example</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this toy example, we generate data from three classes, split between three two-dimensional v...">
+
+.. only:: html
+
+  .. image:: /tutorial/auto_examples/mumbo/images/thumb/sphx_glr_plot_mumbo_3_views_3_classes_thumb.png
+    :alt: Mumbo 3 views, 3 classes example
+
+  :ref:`sphx_glr_tutorial_auto_examples_mumbo_plot_mumbo_3_views_3_classes.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Mumbo 3 views, 3 classes example</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /tutorial/auto_examples/mumbo/plot_mumbo_2_views_2_classes
+   /tutorial/auto_examples/mumbo/plot_mumbo_3_views_3_classes
+

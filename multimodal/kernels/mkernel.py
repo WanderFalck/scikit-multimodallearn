@@ -42,9 +42,13 @@
 #
 import numpy as np
 import scipy as sp
+from sklearn.utils import check_array
 from sklearn.metrics.pairwise import pairwise_kernels, PAIRWISE_KERNEL_FUNCTIONS
 from abc import ABCMeta
-from multimodal.datasets.data_sample import DataSample, MultiModalArray
+from sklearn.tree import BaseDecisionTree
+from sklearn.tree._tree import DTYPE
+from sklearn.ensemble._forest import BaseForest
+from multimodal.datasets.data_sample import MultiModalArray
 
 
 class MKernel(metaclass=ABCMeta):
@@ -82,8 +86,34 @@ class MKernel(metaclass=ABCMeta):
         elif isinstance(self.kernel, list):
             ind = min(v, len(self.kernel) - 1)
             met = self.kernel[ind]
+        if Y is not None:
+        # print(Y.shape[0], Y.shape[1])
+            print("Y is None")
+
         return pairwise_kernels(X, Y, metric=met,
                                 filter_params=True, **params)
+
+    def _validate_X_predict(self, X):
+        """Ensure that X is in the proper format."""
+        if X.ndim < 2:
+            X = X[np.newaxis, :]
+            if X.shape[1] != self.n_classes:
+                raise ValueError("Number of features of the model must "
+                                    "match the input. Model n_features is %s and "
+                                     "input n_features is %s " % (self.n_classes, X.shape[1]))
+            else:
+                mes = "Reshape your data as a 2D-array "
+                raise ValueError(mes)
+
+        if X.ndim > 1:
+            if X.shape[0] != self.X_.shape[0]:
+                if X.shape[0] == self.n_classes and X.shape[1] > 1:
+                    raise ValueError("Reshape your data")
+                else:
+                    raise ValueError("Number of features of the model must "
+                                    "match the input. Model n_features is %s and "
+                                     "input n_features is %s " % (self.X_.shape[0], X.shape[0]))
+        return X
 
     def _global_kernel_transform(self, X, views_ind=None, Y=None):
         """

@@ -49,10 +49,10 @@ from sklearn.base import RegressorMixin
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics.pairwise import pairwise_kernels
 from sklearn.utils.validation import check_X_y
-from sklearn.utils.validation  import check_array
+from sklearn.utils.validation import check_array
 from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.multiclass import type_of_target
-from sklearn.utils.validation  import check_is_fitted
+from sklearn.utils.validation import check_is_fitted
 from multimodal.datasets.data_sample import DataSample, MultiModalArray
 from multimodal.kernels.mkernel import MKernel
 
@@ -158,6 +158,8 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
 
     """
     # r_cond = 10-30
+    warning_message = {}
+
     def __init__(self, lmbda=0.1, eta=1, nystrom_param=1.0, kernel="linear",
                  kernel_params=None,
                  learn_A=1, learn_w=0, precision=1E-4, n_loops=6):
@@ -169,17 +171,16 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
         self.learn_A = learn_A
         self.learn_w = learn_w
         self.n_loops = n_loops
-        self.kernel= kernel
+        self.kernel = kernel
         self.kernel_params = kernel_params
         self.precision = precision
-        self.warning_message = {}
 
     def _more_tags(self):
         return {'X_types': ["2darray"], 'binary_only': True,
-                'multilabel' : False,
+                'multilabel': False,
                 }
 
-    def fit(self, X, y= None, views_ind=None):
+    def fit(self, X, y=None, views_ind=None):
         """
         Fit the MVML classifier
 
@@ -223,24 +224,26 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
 
         # Store the classes seen during fit
         self.regression_ = False
-        self.X_, self.K_= self._global_kernel_transform(X, views_ind=views_ind)
+        self.X_, self.K_ = self._global_kernel_transform(X, views_ind=views_ind)
         check_X_y(self.X_, y)
-
+        if not isinstance(y, np.ndarray):
+            y = np.asarray(y)
         if type_of_target(y) in "binary":
             check_classification_targets(y)
             self.classes_, y = np.unique(y, return_inverse=True)
-            y[y==0] = -1.0
+            y[y == 0] = -1.0
             self.n_classes = len(self.classes_)
         elif type_of_target(y) in "continuous":
             y = y.astype(float)
             self.regression_ = True
         else:
-            raise ValueError("MVML algorithms is a binary classifier"
-                             " or performs regression with float target")
+            raise ValueError("Unknown label type")
+
         self.y_ = y
 
         n = self.K_.shape[0]
-        self.n_approx = int(np.floor(self.nystrom_param * n))  # number of samples in approximation, equals n if no approx.
+        self.n_approx = int(
+            np.floor(self.nystrom_param * n))  # number of samples in approximation, equals n if no approx.
         if self.nystrom_param < 1:
             self._calc_nystrom(self.K_, self.n_approx)
         else:
@@ -280,7 +283,6 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
         lmbda = self.lmbda
         if learn_A < 3:
             eta = self.eta
-
         # ========= initialize A =========
 
         # positive definite initialization (with multiplication with the U matrices if using approximation)
@@ -343,7 +345,7 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
                     A_inv = spli.pinv(A + 1e-07 * np.eye(views * self.n_approx))
                 except spli.LinAlgError:
                     try:
-                        A_inv = spli.pinv(A + 1e-06 * np.eye(views * self.n_approx)) # , rcond=self.r_cond*minA
+                        A_inv = spli.pinv(A + 1e-06 * np.eye(views * self.n_approx))  # , rcond=self.r_cond*minA
                     except ValueError:
                         self.warning_message["ValueError"] = self.warning_message.get("ValueError", 0) + 1
                         return A_prev, g_prev
@@ -356,14 +358,14 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
                     A_inv[v * self.n_approx:(v + 1) * self.n_approx, vv * self.n_approx:(vv + 1) * self.n_approx] = \
                         w[v] * w[vv] * np.dot(np.transpose(self.U_dict[v]), self.U_dict[vv]) + \
                         lmbda * A_inv[v * self.n_approx:(v + 1) * self.n_approx,
-                                      vv * self.n_approx:(vv + 1) * self.n_approx]
+                                vv * self.n_approx:(vv + 1) * self.n_approx]
                 g[v * self.n_approx:(v + 1) * self.n_approx, 0] = np.dot(w[v] * np.transpose(self.U_dict[v]), self.y_)
             try:
                 # Changed because of numerical instability
                 # minA_inv = np.min(np.absolute(A_inv)) , rcond=self.r_cond*minA_inv
                 # here A_inv isn't actually inverse of A (changed in above loop)
                 if np.linalg.cond(A_inv) < 10:
-                   g = np.dot(spli.pinv(A_inv), g)
+                    g = np.dot(spli.pinv(A_inv), g)
                 else:
                     # Changed because of numerical instability
                     # g = np.dot(self._inverse_precond_LU(A_inv, pos="precond_A_1"), g)
@@ -401,32 +403,33 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
                     Z[:, v] = np.dot(self.U_dict[v], g[v * self.n_approx:(v + 1) * self.n_approx]).ravel()
                 w = np.dot(spli.pinv(np.dot(np.transpose(Z), Z)), np.dot(np.transpose(Z), self.y_))
             loop_counter += 1
+
         return A, g, w
 
     def _inv_best_precond(self, A, pos="precond_A"):
-        J_1 = np.diag(1.0/np.diag(A))
+        J_1 = np.diag(1.0 / np.diag(A))
         Pre_J = np.dot(J_1, A)
         Pm, L, U = spli.lu(A)
         M = spli.inv(np.dot(L, U))
         Pre_lu = np.dot(M, A)
         if np.linalg.cond(A) > np.linalg.cond(Pre_J) and np.linalg.cond(Pre_J) <= np.linalg.cond(Pre_lu):
             P_inv = spli.pinv(Pre_J)
-            A_inv = np.dot(P_inv,  J_1)
+            A_inv = np.dot(P_inv, J_1)
             self.warning_message[pos] = self.warning_message.get(pos, 0) + 1
-        elif  np.linalg.cond(Pre_lu) < np.linalg.cond(A):
+        elif np.linalg.cond(Pre_lu) < np.linalg.cond(A):
             P_inv = spli.pinv(Pre_lu)
-            A_inv = np.dot(P_inv,  M)
+            A_inv = np.dot(P_inv, M)
             self.warning_message[pos] = self.warning_message.get(pos, 0) + 1
         else:
             A_inv = spli.pinv(A)
         return A_inv
 
     def _inverse_precond_jacobi(self, A, pos="precond_A"):  # pragma: no cover
-        J_1 = np.diag(1.0/np.diag(A))
+        J_1 = np.diag(1.0 / np.diag(A))
         P = np.dot(J_1, A)
         if np.linalg.cond(A) > np.linalg.cond(P):
             P_inv = spli.pinv(P)
-            A_inv = np.dot(P_inv,  J_1)
+            A_inv = np.dot(P_inv, J_1)
             self.warning_message[pos] = self.warning_message.get(pos, 0) + 1
         else:
             A_inv = self._inverse_precond_LU(A, pos=pos)
@@ -438,7 +441,7 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
         P = np.dot(M, A)
         if np.linalg.cond(A) > np.linalg.cond(P):
             P_inv = spli.pinv(P)
-            A_inv = np.dot(P_inv,  M)
+            A_inv = np.dot(P_inv, M)
             self.warning_message[pos] = self.warning_message.get(pos, 0) + 1
         else:
             A_inv = spli.pinv(A)
@@ -476,7 +479,6 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
             pred = np.where(pred == -1, 0, pred)
             return np.take(self.classes_, pred)
 
-
     def decision_function(self, X):
         """Compute the decision function of X.
 
@@ -497,12 +499,13 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
             ``classes_``.
 
         """
-        check_is_fitted(self, ['X_', 'U_dict', 'K_', 'y_']) # , 'U_dict', 'K_' 'y_'
+        check_is_fitted(self, ['X_', 'U_dict', 'K_', 'y_'])  # , 'U_dict', 'K_' 'y_'
         X, test_kernels = self._global_kernel_transform(X,
                                                         views_ind=self.X_.views_ind,
                                                         Y=self.X_)
-
-        check_array(X)
+        X = check_array(X)
+        # TODO
+        self._validate_X_predict(X)
         pred = self._predict_mvml(test_kernels, self.g, self.w).squeeze()
         return pred
 
@@ -532,15 +535,15 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
                                                                   np.dot(test_kernels.get_view(v)[:, 0:self.n_approx],
                                                                          self.W_sqrootinv_dict[v])
             else:
-                K[:, v * self.n_approx : (v + 1) * self.n_approx] = w[v] * test_kernels.get_view(v)
+                K[:, v * self.n_approx: (v + 1) * self.n_approx] = w[v] * test_kernels.get_view(v)
 
         return np.dot(K, g)
 
     def _learn_A_func(self, A, g, lmbda, eta):
         # basic gradient descent
         stepsize = 0.5
-        if stepsize*eta >= 0.5:
-            stepsize = 0.9*(1/(2*eta))  # make stepsize*eta < 0.5
+        if stepsize * eta >= 0.5:
+            stepsize = 0.9 * (1 / (2 * eta))  # make stepsize*eta < 0.5
 
         loops = 0
         not_converged = True
@@ -548,14 +551,15 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
             A_prev = np.copy(A)
             # minA = np.min(np.absolute(A)) , rcond=self.r_cond*minA
             A_pinv = spli.pinv(A)
-            A = (1-2*stepsize*eta)*A + stepsize*lmbda*np.dot(np.dot(A_pinv, g), np.dot(np.transpose(g), A_pinv))
+            A = (1 - 2 * stepsize * eta) * A + stepsize * lmbda * np.dot(np.dot(A_pinv, g),
+                                                                         np.dot(np.transpose(g), A_pinv))
 
             if loops > 0:
                 prev_diff = diff
             diff = np.linalg.norm(A - A_prev) / np.linalg.norm(A_prev)
             if loops > 0 and prev_diff > diff:
                 A = A_prev
-                stepsize = stepsize*0.1
+                stepsize = stepsize * 0.1
             if diff < 1e-5:
                 not_converged = False
             if loops > 100:
@@ -621,7 +625,7 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
         val[val < 0] = 0
 
         A_tmp = np.dot(vec, np.dot(np.diag(val), np.transpose(vec)))
-        A_new = np.zeros((views*m, views*m))
+        A_new = np.zeros((views * m, views * m))
 
         # proximal update, group by group (symmetric!)
         for v in range(views):
@@ -631,15 +635,15 @@ class MVML(MKernel, BaseEstimator, ClassifierMixin, RegressorMixin):
                         multiplier = 1 - gamma / (2 * np.linalg.norm(A_tmp[v * m:(v + 1) * m, vv * m:(vv + 1) * m]))
                         if multiplier > 0:
                             A_new[v * m:(v + 1) * m, vv * m:(vv + 1) * m] = multiplier * A_tmp[v * m:(v + 1) * m,
-                                                                                               vv * m:(vv + 1) * m]
+                                                                                         vv * m:(vv + 1) * m]
                             A_new[vv * m:(vv + 1) * m, v * m:(v + 1) * m] = multiplier * A_tmp[vv * m:(vv + 1) * m,
-                                                                                               v * m:(v + 1) * m]
+                                                                                         v * m:(v + 1) * m]
                 else:
                     if (np.linalg.norm(A_tmp[v * m:(v + 1) * m, v * m:(v + 1) * m])) != 0:
                         multiplier = 1 - gamma / (np.linalg.norm(A_tmp[v * m:(v + 1) * m, v * m:(v + 1) * m]))
                         if multiplier > 0:
                             A_new[v * m:(v + 1) * m, v * m:(v + 1) * m] = multiplier * A_tmp[v * m:(v + 1) * m,
-                                                                                             v * m:(v + 1) * m]
+                                                                                       v * m:(v + 1) * m]
 
         return A_new
 
